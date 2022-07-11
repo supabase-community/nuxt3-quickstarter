@@ -13,8 +13,10 @@
     </div>
 </template>
 
-<script>
+<script setup>
 const { path } = toRefs(prop)
+const supabase = useSupabaseClient()
+
 const size = ref("10em")
 const uploading = ref(false)
 const src = ref("")
@@ -30,6 +32,7 @@ const downloadImage = async () => {
         console.error("Error downloading image: ", error.message)
     }
 }
+
 const uploadAvatar = async (evt) => {
     files.value = evt.target.files
     try {
@@ -53,6 +56,7 @@ const uploadAvatar = async (evt) => {
         uploading.value = false
     }
 }
+
 watch(path, () => {
     path.value ? downloadImage() : ""
 })

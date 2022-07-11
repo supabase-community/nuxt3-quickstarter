@@ -28,37 +28,39 @@
 </template>
 
 <script setup>
+const supabase = useSupabaseClient()
+
 const loading = ref(true)
 const username = ref('')
 const website = ref('')
 const avatar_url = ref('')
-async function getProfile() {
-    try {
-        loading.value = true
-        store.user = supabase.auth.user()
-        let { data, error, status } = await supabase
-            .from('profiles')
-            .select(`username, website, avatar_url`)
-            .eq('id', store.user.id)
-            .single()
-        if (error && status !== 406) throw error
-        if (data) {
-            username.value = data.username
-            website.value = data.website
-            avatar_url.value = data.avatar_url
-        }
-    } catch (error) {
-        alert(error.message)
-    } finally {
-        loading.value = false
+
+try {
+    loading.value = true
+    const user = useUser();
+    let { data, error, status } = await supabase
+        .from('profiles')
+        .select(`username, website, avatar_url`)
+        .eq('id', user.id)
+        .single()
+    if (error && status !== 406) throw error
+    if (data) {
+        username.value = data.username
+        website.value = data.website
+        avatar_url.value = data.avatar_url
     }
+} catch (error) {
+    alert(error.message)
+} finally {
+    loading.value = false
 }
+
 async function updateProfile() {
     try {
         loading.value = true
-        store.user = supabase.auth.user()
+        const user = useUser();
         const updates = {
-            id: store.user.id,
+            id: user.id,
             username: username.value,
             website: website.value,
             avatar_url: avatar_url.value,
@@ -74,6 +76,7 @@ async function updateProfile() {
         loading.value = false
     }
 }
+
 async function signOut() {
     try {
         loading.value = true
@@ -85,16 +88,4 @@ async function signOut() {
         loading.value = false
     }
 }
-// onMounted(() => {
-//     getProfile()
-// })
-// return {
-//     store,
-//     loading,
-//     username,
-//     website,
-//     avatar_url,
-//     updateProfile,
-//     signOut,
-// }
 </script>
