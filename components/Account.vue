@@ -1,9 +1,9 @@
 <template>
     <form class="form-widget" @submit.prevent="updateProfile">
-        <Avatar v-model:path="avatar_url" @upload="updateProfile" />
+        <Avatar v-model:path="avatar_path" @upload="updateProfile" />
         <div>
             <label for="email">Email</label>
-            <input id="email" type="text" :value="store.user.email" disabled />
+            <input id="email" type="text" :value="user.email" disabled />
         </div>
         <div>
             <label for="username">Name</label>
@@ -33,37 +33,32 @@ const supabase = useSupabaseClient()
 const loading = ref(true)
 const username = ref('')
 const website = ref('')
-const avatar_url = ref('')
+const avatar_path = ref('')
 
-try {
-    loading.value = true
-    const user = useUser();
-    let { data, error, status } = await supabase
-        .from('profiles')
-        .select(`username, website, avatar_url`)
-        .eq('id', user.id)
-        .single()
-    if (error && status !== 406) throw error
-    if (data) {
-        username.value = data.username
-        website.value = data.website
-        avatar_url.value = data.avatar_url
-    }
-} catch (error) {
-    alert(error.message)
-} finally {
-    loading.value = false
+
+loading.value = true
+const user = useUser();
+let { data } = await supabase
+    .from('profiles')
+    .select(`username, website, avatar_url`)
+    .eq('id', user.value.id)
+    .single()
+if (data) {
+    username.value = data.username
+    website.value = data.website
+    avatar_path.value = data.avatar_url
 }
+loading.value = false
 
 async function updateProfile() {
     try {
         loading.value = true
         const user = useUser();
         const updates = {
-            id: user.id,
+            id: user.value.id,
             username: username.value,
             website: website.value,
-            avatar_url: avatar_url.value,
+            avatar_url: avatar_path.value,
             updated_at: new Date(),
         }
         let { error } = await supabase.from('profiles').upsert(updates, {
