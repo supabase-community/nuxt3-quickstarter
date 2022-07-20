@@ -1,42 +1,67 @@
-# Nuxt 3 Minimal Starter
+# Supabase Nuxt User Management
 
-Look at the [nuxt 3 documentation](https://v3.nuxtjs.org) to learn more.
+This repo is a quick sample of how you can get started building apps using Nuxt 3 and Supabase. You can find a step by step guide of how to build out this app in the [Quickstart: Nuxt  guide](https://supabase.io/docs/guides/with-nuxt). 
 
-## Setup
+This repo will demonstrate how to:
+- sign users in with Supabase Auth using [magic link](https://supabase.io/docs/reference/dart/auth-signin#sign-in-with-magic-link)
+- store and retrieve data with [Supabase database](https://supabase.io/docs/guides/database)
+- store image files in [Supabase storage](https://supabase.io/docs/guides/storage)
 
-Make sure to install the dependencies:
+## Getting Started
 
-```bash
-# yarn
-yarn install
+Before running this app, you need to create a Supabase project and copy [your credentials](https://supabase.io/docs/guides/with-nuxt#get-the-api-keys) to `.env`. 
 
-# npm
-npm install
-
-# pnpm
-pnpm install --shamefully-hoist
-```
-
-## Development Server
-
-Start the development server on http://localhost:3000
-
+Run the following command to launch it on `localhost:3000`
 ```bash
 npm run dev
 ```
 
-## Production
+## Database Schema
 
-Build the application for production:
+```sql
+-- Create a table for public "profiles"
+create table profiles (
+  id uuid references auth.users not null,
+  updated_at timestamp with time zone,
+  username text unique,
+  avatar_url text,
+  website text,
 
-```bash
-npm run build
+  primary key (id),
+  unique(username),
+  constraint username_length check (char_length(username) >= 3)
+);
+
+alter table profiles enable row level security;
+
+create policy "Public profiles are viewable by everyone."
+  on profiles for select
+  using ( true );
+
+create policy "Users can insert their own profile."
+  on profiles for insert
+  with check ( auth.uid() = id );
+
+create policy "Users can update own profile."
+  on profiles for update
+  using ( auth.uid() = id );
+
+-- Set up Realtime!
+begin;
+  drop publication if exists supabase_realtime;
+  create publication supabase_realtime;
+commit;
+alter publication supabase_realtime add table profiles;
+
+-- Set up Storage!
+insert into storage.buckets (id, name)
+values ('avatars', 'avatars');
+
+create policy "Avatar images are publicly accessible."
+  on storage.objects for select
+  using ( bucket_id = 'avatars' );
+
+create policy "Anyone can upload an avatar."
+  on storage.objects for insert
+  with check ( bucket_id = 'avatars' );
 ```
-
-Locally preview production build:
-
-```bash
-npm run preview
-```
-
-Checkout the [deployment documentation](https://v3.nuxtjs.org/guide/deploy/presets) for more information.
