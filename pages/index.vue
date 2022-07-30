@@ -13,7 +13,7 @@ const user = useUser();
 
 user.value = useSupabaseUser()
 supabase.auth.onAuthStateChange((_, session) => {
-    user.value = session.user
+    user.value = session?.user
 })
 
 </script>
