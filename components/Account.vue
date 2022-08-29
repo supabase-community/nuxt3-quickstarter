@@ -37,7 +37,7 @@ const avatar_path = ref('')
 
 
 loading.value = true
-const user = useUser();
+const user = useSupabaseUser();
 let { data } = await supabase
     .from('profiles')
     .select(`username, website, avatar_url`)
@@ -53,7 +53,7 @@ loading.value = false
 async function updateProfile() {
     try {
         loading.value = true
-        const user = useUser();
+        const user = useSupabaseUser();
         const updates = {
             id: user.value.id,
             username: username.value,
