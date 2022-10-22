@@ -1,5 +1,8 @@
 # Supabase Nuxt User Management
 
+> **Warning**
+> All example apps have been consolidated to Supabase's main repo. You can find the nuxt3 quick start guide [here](https://github.com/supabase/supabase/tree/master/examples/user-management/nuxt3-user-management).
+
 This repo is a quick sample of how you can get started building apps using Nuxt 3 and Supabase. You can find a step by step guide of how to build out this app in the [Quickstart: Nuxt  guide](https://supabase.io/docs/guides/with-nuxt-3). 
 
 This repo will demonstrate how to:
